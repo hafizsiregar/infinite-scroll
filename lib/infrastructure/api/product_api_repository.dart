@@ -22,9 +22,13 @@ class ProductApiRepository implements IProductRepository {
   }
 
   @override
-  Future<List<Product>> searchProducts({required String query}) async {}
+  Future<List<Product>> searchProducts({required String query}) async {
+    return Future.value([]);
+  }
 
   @override
   Future<List<Product>> filterProductsByCategory(
-      {required String category}) async {}
+      {required String category}) async {
+    return Future.value([]);
+  }
 }

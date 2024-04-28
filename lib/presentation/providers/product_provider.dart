@@ -9,7 +9,9 @@ class ProductProvider with ChangeNotifier {
   int _pageNumber = 1;
   final int _pageSize = 10;
 
-  ProductProvider(this.productService);
+  ProductProvider(this.productService) {
+    fetchProducts();
+  }
 
   List<Product> get products => _products;
   bool get hasMore => _hasMore;
