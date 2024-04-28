@@ -8,6 +8,7 @@ class ProductProvider with ChangeNotifier {
   bool _hasMore = true;
   int _pageNumber = 1;
   final int _pageSize = 10;
+  String? _currentCategory;
 
   ProductProvider(this.productService) {
     fetchProducts();
@@ -18,8 +19,8 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> fetchProducts() async {
     try {
-      final newProducts =
-          await productService.fetchProducts(_pageNumber, _pageSize);
+      final newProducts = await productService
+          .fetchProducts(_pageNumber, _pageSize, category: _currentCategory);
       _products.addAll(newProducts);
       if (newProducts.length < _pageSize) {
         _hasMore = false;
@@ -29,5 +30,13 @@ class ProductProvider with ChangeNotifier {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> filterProductsByCategory(String category) async {
+    _currentCategory = category;
+    _pageNumber = 1;
+    _products.clear();
+    await fetchProducts();
+    notifyListeners();
   }
 }

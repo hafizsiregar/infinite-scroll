@@ -9,7 +9,7 @@ class ProductApiRepository implements IProductRepository {
 
   @override
   Future<List<Product>> fetchProducts(
-      {required int page, required int pageSize}) async {
+      {required int page, required int pageSize, String? category}) async {
     final response =
         await http.get(Uri.parse('$_baseUrl?page=$page&limit=$pageSize'));
     if (response.statusCode == 200) {
@@ -36,7 +36,10 @@ class ProductApiRepository implements IProductRepository {
   @override
   Future<List<Product>> filterProductsByCategory(
       {required String category}) async {
-    final response = await http.get(Uri.parse('$_baseUrl?category=$category'));
+    final url = '$_baseUrl?category=$category';
+    print('Fetching products from: $url');
+    final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
       final List<dynamic> productsJson = data['products'];
