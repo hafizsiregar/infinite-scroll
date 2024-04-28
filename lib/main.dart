@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Flutter Product App',
+        title: 'Infinite Scroll App',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),

@@ -16,8 +16,28 @@ class ProductListScreen extends StatefulWidget {
 
 class _ProductListScreenState extends State<ProductListScreen> {
   String? _currentCategory = 'All';
+  late final PagewiseLoadController<Product> _pageLoadController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageLoadController = PagewiseLoadController<Product>(
+      pageSize: ProductProvider.pageSize,
+      pageFuture: (pageIndex) =>
+          Provider.of<ProductProvider>(context, listen: false).fetchProducts(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
+
+    void resetPageLoadController() {
+      _pageLoadController.reset();
+      productProvider.fetchProducts();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product List'),
@@ -38,12 +58,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
               );
             }).toList(),
             onChanged: (String? newValue) {
-              if (newValue != null) {
+              if (newValue != null && newValue != _currentCategory) {
                 setState(() {
                   _currentCategory = newValue;
                 });
-                Provider.of<ProductProvider>(context, listen: false)
-                    .filterProductsByCategory(newValue);
+                productProvider.filterProductsByCategory(newValue);
+                resetPageLoadController();
               }
             },
             hint: const Text("Select Category"),
@@ -61,7 +81,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         ],
       ),
       body: PagewiseListView<Product>(
-        pageSize: ProductProvider.pageSize,
+        pageLoadController: _pageLoadController,
         itemBuilder: (context, product, index) => ListTile(
           leading: Image.network(product.thumbnail),
           title: Text(product.title),
@@ -72,10 +92,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ));
           },
         ),
-        pageFuture: (pageIndex) {
-          return Provider.of<ProductProvider>(context, listen: false)
-              .fetchProducts();
-        },
       ),
     );
   }
