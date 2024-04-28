@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scrool/application/product_service.dart';
+import 'package:infinite_scrool/presentation/screens/product_detail_screen.dart';
 import 'package:infinite_scrool/presentation/screens/product_search_delegate.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
@@ -79,6 +80,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   leading: Image.network(product.thumbnail),
                   title: Text(product.title),
                   subtitle: Text('\$${product.price.toString()}'),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailScreen(product: product),
+                    ));
+                  },
                 );
               },
             ),
