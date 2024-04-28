@@ -6,9 +6,11 @@ class ProductProvider with ChangeNotifier {
   final ProductService productService;
   final List<Product> _products = [];
   bool _hasMore = true;
-  int _pageNumber = 1;
-  final int _pageSize = 10;
+  // int _pageNumber = 1;
+  // final int _pageSize = 10;
   String? _currentCategory;
+  static const int pageSize = 10;
+  int pageNumber = 0;
 
   ProductProvider(this.productService) {
     fetchProducts();
@@ -16,17 +18,18 @@ class ProductProvider with ChangeNotifier {
 
   List<Product> get products => _products;
   bool get hasMore => _hasMore;
-
-  Future<void> fetchProducts() async {
+  Future<List<Product>> fetchProducts() async {
+    if (!_hasMore) return [];
     try {
       final newProducts = await productService
-          .fetchProducts(_pageNumber, _pageSize, category: _currentCategory);
+          .fetchProducts(pageNumber, pageSize, category: _currentCategory);
       _products.addAll(newProducts);
-      if (newProducts.length < _pageSize) {
+      if (newProducts.length < pageSize) {
         _hasMore = false;
       }
-      _pageNumber++;
+      pageNumber++;
       notifyListeners();
+      return newProducts;
     } catch (e) {
       rethrow;
     }
@@ -34,7 +37,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> filterProductsByCategory(String category) async {
     _currentCategory = category;
-    _pageNumber = 1;
+    pageNumber = 1;
     _products.clear();
     await fetchProducts();
     notifyListeners();
