@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scrool/application/product_service.dart';
+import 'package:infinite_scrool/presentation/screens/product_search_delegate.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 
@@ -10,6 +12,18 @@ class ProductListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product List'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              final productService =
+                  Provider.of<ProductService>(context, listen: false);
+              showSearch(
+                  context: context,
+                  delegate: ProductSearchDelegate(productService));
+            },
+          ),
+        ],
       ),
       body: Consumer<ProductProvider>(
         builder: (context, provider, child) {

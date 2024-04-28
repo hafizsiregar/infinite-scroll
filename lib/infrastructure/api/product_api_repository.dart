@@ -23,12 +23,27 @@ class ProductApiRepository implements IProductRepository {
 
   @override
   Future<List<Product>> searchProducts({required String query}) async {
-    return Future.value([]);
+    final response = await http.get(Uri.parse('$_baseUrl/search?q=$query'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final List<dynamic> productsJson = data['products'];
+      return productsJson.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw http.ClientException('Failed to load searched products');
+    }
   }
 
   @override
   Future<List<Product>> filterProductsByCategory(
       {required String category}) async {
-    return Future.value([]);
+    final response = await http.get(Uri.parse('$_baseUrl?category=$category'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final List<dynamic> productsJson = data['products'];
+      return productsJson.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw http.ClientException(
+          'Failed to load products for category $category');
+    }
   }
 }

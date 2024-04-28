@@ -9,4 +9,8 @@ class ProductService {
   Future<List<Product>> fetchProducts(int page, int pageSize) {
     return productRepository.fetchProducts(page: page, pageSize: pageSize);
   }
+
+  Future<List<Product>> searchProducts(String query) {
+    return productRepository.searchProducts(query: query);
+  }
 }
