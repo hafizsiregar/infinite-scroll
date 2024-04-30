@@ -3,7 +3,7 @@ import 'package:infinite_scrool/application/product_service.dart';
 import 'package:infinite_scrool/domain/repositories/i_product_repository.dart';
 import 'package:infinite_scrool/infrastructure/api/product_api_repository.dart';
 import 'package:infinite_scrool/presentation/providers/product_provider.dart';
-import 'package:infinite_scrool/presentation/screens/product_list_screen.dart';
+import 'package:infinite_scrool/presentation/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: const ProductListScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
