@@ -17,20 +17,24 @@ class ProductProvider with ChangeNotifier {
   List<Product> get products => _products;
   bool get hasMore => _hasMore;
 
-  Future<List<Product>> fetchProducts() async {
+  Future<List<Product>> fetchProducts({int pageIndex = 0}) async {
+    // Assuming pageSize is a static constant or similarly defined.
+    int pageNumber =
+        pageIndex + 1; // Assuming your API expects 1-based indexing for pages.
     if (!_hasMore) return <Product>[];
+
     try {
-      final newProducts = await productService
-          .fetchProducts(pageNumber, pageSize, category: _currentCategory);
-      print('Loaded ${newProducts.length} products.');
+      final newProducts = await productService.fetchProducts(
+          pageNumber, ProductProvider.pageSize,
+          category: _currentCategory);
+      print('Loaded ${newProducts.length} products on page $pageNumber.');
+
       if (pageNumber == 1) {
         _products.clear();
       }
       _products.addAll(newProducts);
-      if (newProducts.length < pageSize) {
+      if (newProducts.length < ProductProvider.pageSize) {
         _hasMore = false;
-      } else {
-        pageNumber++;
       }
       notifyListeners();
       return newProducts;

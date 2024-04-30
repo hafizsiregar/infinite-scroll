@@ -24,7 +24,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
     _pageLoadController = PagewiseLoadController<Product>(
       pageSize: ProductProvider.pageSize,
       pageFuture: (pageIndex) =>
-          Provider.of<ProductProvider>(context, listen: false).fetchProducts(),
+          Provider.of<ProductProvider>(context, listen: false)
+              .fetchProducts(pageIndex: pageIndex ?? 0),
     );
   }
 
@@ -51,6 +52,24 @@ class _ProductListScreenState extends State<ProductListScreen> {
         pageLoadController: _pageLoadController,
         itemBuilder: (context, product, index) =>
             buildProductItem(product, context),
+        noItemsFoundBuilder: (context) =>
+            const Center(child: Text("No products found")),
+        errorBuilder: (context, error) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Error: $error'),
+              ElevatedButton(
+                onPressed: () {
+                  _pageLoadController
+                      .retry(); // Make sure this method matches the API of the controller
+                },
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+        showRetry: false, // Explicitly set showRetry to false
       ),
     );
   }
@@ -58,7 +77,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   Widget buildDropdown() {
     return DropdownButton<String>(
       value: _currentCategory,
-      items: <String>[
+      items: [
         'All',
         'Smartphones',
         'Laptops',
@@ -76,18 +95,12 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }).toList(),
       onChanged: (String? newValue) {
         if (newValue != null && newValue != _currentCategory) {
-          Provider.of<ProductProvider>(context, listen: false)
-              .filterProductsByCategory(newValue)
-              .then((_) {
-            if (mounted) {
-              setState(() {
-                _currentCategory = newValue;
-              });
-              _pageLoadController.reset();
-            }
-          }).catchError((error) {
-            print("Error during filtering: $error");
+          setState(() {
+            _currentCategory = newValue;
           });
+          _pageLoadController.reset();
+          Provider.of<ProductProvider>(context, listen: false)
+              .filterProductsByCategory(newValue);
         }
       },
     );
@@ -97,7 +110,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return ListTile(
       leading: Image.network(product.thumbnail),
       title: Text(product.title),
-      subtitle: Text('\$${product.price.toString()}'),
+      subtitle: Text('\$${product.price}'),
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => ProductDetailScreen(product: product),
