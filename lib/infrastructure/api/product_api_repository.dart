@@ -10,10 +10,9 @@ class ProductApiRepository implements IProductRepository {
   @override
   Future<List<Product>> fetchProducts(
       {required int page, required int pageSize, String? category}) async {
-    String url = '$_baseUrl?page=$page&limit=$pageSize';
-    if (category != null) {
-      url += '&category=$category';
-    }
+    String url = category == null
+        ? '$_baseUrl?page=$page&limit=$pageSize'
+        : '$_baseUrl/category/$category';
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -39,7 +38,7 @@ class ProductApiRepository implements IProductRepository {
   @override
   Future<List<Product>> filterProductsByCategory(
       {required String category}) async {
-    final url = '$_baseUrl?category=$category';
+    final url = '$_baseUrl/category/$category';
     print('Fetching products from: $url');
     final response = await http.get(Uri.parse(url));
 
@@ -48,8 +47,8 @@ class ProductApiRepository implements IProductRepository {
       final List<dynamic> productsJson = data['products'];
       return productsJson.map((json) => Product.fromJson(json)).toList();
     } else {
-      throw http.ClientException(
-          'Failed to load products for category $category');
+      throw Exception(
+          'Failed to load products for category $category: ${response.statusCode}');
     }
   }
 }

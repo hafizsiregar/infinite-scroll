@@ -11,12 +11,12 @@ class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
 
   @override
-  State<ProductListScreen> createState() => _ProductListScreenState();
+  _ProductListScreenState createState() => _ProductListScreenState();
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
   String? _currentCategory = 'All';
-  late final PagewiseLoadController<Product> _pageLoadController;
+  late PagewiseLoadController<Product> _pageLoadController;
 
   @override
   void initState() {
@@ -30,44 +30,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final productProvider =
-        Provider.of<ProductProvider>(context, listen: false);
-
-    void resetPageLoadController() {
-      _pageLoadController.reset();
-      productProvider.fetchProducts();
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product List'),
+        title: const Text("Product List"),
         actions: <Widget>[
-          DropdownButton<String>(
-            value: _currentCategory,
-            items: <String>[
-              'All',
-              'Smartphones',
-              'Laptops',
-              'Fragrances',
-              'Skincare',
-              'Groceries'
-            ].map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              if (newValue != null && newValue != _currentCategory) {
-                setState(() {
-                  _currentCategory = newValue;
-                });
-                productProvider.filterProductsByCategory(newValue);
-                resetPageLoadController();
-              }
-            },
-            hint: const Text("Select Category"),
-          ),
+          buildDropdown(),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -82,17 +49,66 @@ class _ProductListScreenState extends State<ProductListScreen> {
       ),
       body: PagewiseListView<Product>(
         pageLoadController: _pageLoadController,
-        itemBuilder: (context, product, index) => ListTile(
-          leading: Image.network(product.thumbnail),
-          title: Text(product.title),
-          subtitle: Text('\$${product.price.toString()}'),
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ProductDetailScreen(product: product),
-            ));
-          },
-        ),
+        itemBuilder: (context, product, index) =>
+            buildProductItem(product, context),
       ),
     );
+  }
+
+  Widget buildDropdown() {
+    return DropdownButton<String>(
+      value: _currentCategory,
+      items: <String>[
+        'All',
+        'Smartphones',
+        'Laptops',
+        'Fragrances',
+        'Skincare',
+        'Groceries',
+        'Home-decoration',
+        'Furniture',
+        'Tops'
+      ].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        if (newValue != null && newValue != _currentCategory) {
+          Provider.of<ProductProvider>(context, listen: false)
+              .filterProductsByCategory(newValue)
+              .then((_) {
+            if (mounted) {
+              setState(() {
+                _currentCategory = newValue;
+              });
+              _pageLoadController.reset();
+            }
+          }).catchError((error) {
+            print("Error during filtering: $error");
+          });
+        }
+      },
+    );
+  }
+
+  Widget buildProductItem(Product product, BuildContext context) {
+    return ListTile(
+      leading: Image.network(product.thumbnail),
+      title: Text(product.title),
+      subtitle: Text('\$${product.price.toString()}'),
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => ProductDetailScreen(product: product),
+        ));
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageLoadController.dispose();
+    super.dispose();
   }
 }

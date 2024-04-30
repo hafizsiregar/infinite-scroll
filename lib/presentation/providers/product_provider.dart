@@ -22,6 +22,7 @@ class ProductProvider with ChangeNotifier {
     try {
       final newProducts = await productService
           .fetchProducts(pageNumber, pageSize, category: _currentCategory);
+      print('Loaded ${newProducts.length} products.');
       if (pageNumber == 1) {
         _products.clear();
       }
@@ -34,18 +35,19 @@ class ProductProvider with ChangeNotifier {
       notifyListeners();
       return newProducts;
     } catch (e) {
+      print('Error fetching products: $e');
       _hasMore = false;
       notifyListeners();
       return <Product>[];
     }
   }
 
-  Future<void> filterProductsByCategory(String category) async {
-    _currentCategory = category;
+  Future filterProductsByCategory(String category) async {
+    _currentCategory = category == 'All' ? null : category;
     pageNumber = 1;
     _hasMore = true;
     _products.clear();
-    await fetchProducts();
     notifyListeners();
+    fetchProducts();
   }
 }
